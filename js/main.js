@@ -6,7 +6,12 @@ import {
    FIRST_LOAD_LIMIT
 } from './constants.js';
 import { debounce, fetchData, mergeData } from './helpers.js';
-import { render, renderEndMessage, renderSpinner } from './renderer.js';
+import {
+   clearPostsElement,
+   render,
+   renderEndMessage,
+   renderSpinner
+} from './renderer.js';
 
 const state = {
    filter: '',
@@ -31,7 +36,12 @@ function update(filterWasUpdated = false) {
       .then(posts => {
          if (!posts.length) {
             state.isAllFetched = true;
-            renderEndMessage();
+            if (state.filter) {
+               clearPostsElement();
+            }
+            renderEndMessage(
+               state.filter ? 'По запросу ничего не найдено' : 'Постов больше нет'
+            );
             return;
          }
          mergeData(posts, state).then(merged => {
@@ -56,7 +66,7 @@ window.addEventListener(
       if (state.isAllFetched) {
          return;
       }
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+      if (Math.ceil(window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
          state.page++;
          update();
       }

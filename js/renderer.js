@@ -1,6 +1,10 @@
 import { postsContainerElement } from './constants.js';
 import { createElement } from './helpers.js';
 
+export function clearPostsElement() {
+   postsContainerElement.innerHTML = '';
+}
+
 export function renderSpinner() {
    postsContainerElement.appendChild(
       createElement({
@@ -10,19 +14,19 @@ export function renderSpinner() {
    );
 }
 
-export function renderEndMessage() {
+export function renderEndMessage(message) {
    postsContainerElement.querySelector('.spinner')?.remove();
    postsContainerElement.appendChild(
       createElement({
          type: 'p',
          classNames: ['postsEnded'],
-         innerText: 'Постов больше нет'
+         innerText: message
       })
    );
 }
 
 export function render(records) {
-   postsContainerElement.innerHTML = '';
+   clearPostsElement();
    for (const record of records) {
       const userElement = createElement({
          type: 'div',
