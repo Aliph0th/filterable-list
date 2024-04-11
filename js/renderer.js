@@ -10,6 +10,17 @@ export function renderSpinner() {
    );
 }
 
+export function renderEndMessage() {
+   postsContainerElement.querySelector('.spinner')?.remove();
+   postsContainerElement.appendChild(
+      createElement({
+         type: 'p',
+         classNames: ['postsEnded'],
+         innerText: 'Постов больше нет'
+      })
+   );
+}
+
 export function render(records) {
    postsContainerElement.innerHTML = '';
    for (const record of records) {

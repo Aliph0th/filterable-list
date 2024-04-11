@@ -3,34 +3,43 @@ import {
    DEBOUNCE_DELAY,
    DEFAULT_LIMIT,
    filterElement,
-   loadMoreBtn
+   FIRST_LOAD_LIMIT
 } from './constants.js';
 import { debounce, fetchData, mergeData } from './helpers.js';
-import { render, renderSpinner } from './renderer.js';
+import { render, renderEndMessage, renderSpinner } from './renderer.js';
 
 const state = {
    filter: '',
    records: [],
    position: 0,
-   cachedUsers: {}
+   cachedUsers: {},
+   isAllFetched: false
 };
 
 function update(filterWasUpdated = false) {
    if (filterWasUpdated) {
       state.position = 0;
+      state.isAllFetched = false;
    }
+   const limit = state.position ? DEFAULT_LIMIT : FIRST_LOAD_LIMIT;
+   renderSpinner();
    fetchData(`${API_URL}/posts`, {
       title_like: state.filter,
       _start: state.position,
-      _limit: DEFAULT_LIMIT
+      _limit: limit
    })
-      .then(posts =>
+      .then(posts => {
+         if (!posts.length) {
+            state.isAllFetched = true;
+            renderEndMessage();
+            return;
+         }
          mergeData(posts, state).then(merged => {
             state.records = filterWasUpdated ? merged : [...state.records, ...merged];
             render(state.records);
-            state.position += DEFAULT_LIMIT;
-         })
-      )
+            state.position += limit;
+         });
+      })
       .catch(reason => console.error(reason) /*TODO:*/);
 }
 filterElement.addEventListener(
@@ -41,9 +50,17 @@ filterElement.addEventListener(
    }, DEBOUNCE_DELAY)
 );
 
-loadMoreBtn.addEventListener('click', () => {
-   state.page++;
-   update();
-});
+window.addEventListener(
+   'scroll',
+   debounce(() => {
+      if (state.isAllFetched) {
+         return;
+      }
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+         state.page++;
+         update();
+      }
+   }, DEBOUNCE_DELAY)
+);
 
 update();
