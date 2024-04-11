@@ -40,7 +40,7 @@ function update(filterWasUpdated = false) {
             state.position += limit;
          });
       })
-      .catch(reason => console.error(reason) /*TODO:*/);
+      .catch(reason => console.error(reason));
 }
 filterElement.addEventListener(
    'input',

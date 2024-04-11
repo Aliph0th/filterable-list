@@ -53,7 +53,7 @@ export async function fetchData(url, query = {}) {
       const response = await fetch(`${url}?${queryParams.join('&')}`);
       return await response.json();
    } catch (error) {
-      console.error(error); //TODO:FIXME:
+      console.error(error);
    }
 }
 
