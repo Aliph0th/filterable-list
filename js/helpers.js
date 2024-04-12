@@ -42,15 +42,19 @@ export function mergeDataForUser(posts, { id, name, email, phone }) {
    };
 }
 
+export const escaped = string => {
+   return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+};
+
 export async function fetchData(url, query = {}) {
-   let queryParams = [];
-   for (const [key, value] of Object.entries(query)) {
+   const filteredQuery = Object.entries(query).reduce((accum, [key, value]) => {
       if (value) {
-         queryParams.push(`${key}=${encodeURIComponent(value)}`);
+         accum[key] = escaped(value.toString());
       }
-   }
+      return accum;
+   }, {});
    try {
-      const response = await fetch(`${url}?${queryParams.join('&')}`);
+      const response = await fetch(`${url}?${new URLSearchParams(filteredQuery)}`);
       return await response.json();
    } catch (error) {
       console.error(error);
