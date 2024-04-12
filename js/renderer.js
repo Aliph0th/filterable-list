@@ -5,13 +5,13 @@ export function clearPostsElement() {
    postsContainerElement.innerHTML = '';
 }
 
-export function renderSpinner() {
-   postsContainerElement.appendChild(
-      createElement({
-         type: 'div',
-         classNames: ['spinner']
-      })
-   );
+export function renderSpinner(insertFirst = false) {
+   const spinner = createElement({
+      type: 'div',
+      classNames: ['spinner']
+   });
+   const position = insertFirst ? 'afterbegin' : 'beforeend';
+   postsContainerElement.insertAdjacentElement(position, spinner);
 }
 
 export function renderEndMessage(message) {

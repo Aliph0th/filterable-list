@@ -27,7 +27,7 @@ function update(filterWasUpdated = false) {
       state.isAllFetched = false;
    }
    const limit = state.position ? DEFAULT_LIMIT : FIRST_LOAD_LIMIT;
-   renderSpinner();
+   renderSpinner(filterWasUpdated);
    fetchData(`${API_URL}/posts`, {
       title_like: state.filter,
       _start: state.position,
@@ -36,11 +36,12 @@ function update(filterWasUpdated = false) {
       .then(posts => {
          if (!posts.length) {
             state.isAllFetched = true;
-            if (state.filter) {
+            const isFilterUpdate = state.filter && filterWasUpdated;
+            if (isFilterUpdate) {
                clearPostsElement();
             }
             renderEndMessage(
-               state.filter ? 'По запросу ничего не найдено' : 'Постов больше нет'
+               isFilterUpdate ? 'По запросу ничего не найдено' : 'Постов больше нет'
             );
             return;
          }
