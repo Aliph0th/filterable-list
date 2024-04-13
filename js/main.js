@@ -6,28 +6,25 @@ import {
    FIRST_LOAD_LIMIT
 } from './constants.js';
 import { debounce, fetchData, mergeData } from './helpers.js';
-import {
-   clearPostsElement,
-   render,
-   renderEndMessage,
-   renderSpinner
-} from './renderer.js';
+import { render, renderSpinner } from './renderer.js';
 
 const state = {
    filter: '',
    records: [],
    position: 0,
    cachedUsers: {},
-   isAllFetched: false
+   isAllFetched: false,
+   isFetching: false
 };
 
 function update(filterWasUpdated = false) {
+   renderSpinner(filterWasUpdated);
    if (filterWasUpdated) {
       state.position = 0;
       state.isAllFetched = false;
    }
+   state.isFetching = true;
    const limit = state.position ? DEFAULT_LIMIT : FIRST_LOAD_LIMIT;
-   renderSpinner(filterWasUpdated);
    fetchData(`${API_URL}/posts`, {
       title_like: state.filter,
       _start: state.position,
@@ -36,42 +33,43 @@ function update(filterWasUpdated = false) {
       .then(posts => {
          if (!posts.length) {
             state.isAllFetched = true;
-            const isFilterUpdate = state.filter && filterWasUpdated;
-            if (isFilterUpdate) {
-               clearPostsElement();
-            }
-            renderEndMessage(
-               isFilterUpdate ? 'По запросу ничего не найдено' : 'Постов больше нет'
-            );
-            return;
+            return [];
          }
-         mergeData(posts, state).then(merged => {
-            state.records = filterWasUpdated ? merged : [...state.records, ...merged];
-            render(state.records);
-            state.position += limit;
-         });
+         return mergeData(posts, state);
       })
-      .catch(reason => console.error(reason));
+      .then(records => {
+         state.records =
+            records.length && !filterWasUpdated
+               ? [...state.records, ...records]
+               : records;
+         render(state, filterWasUpdated);
+         state.position += limit;
+      })
+      .catch(reason => console.error(reason))
+      .finally(() => (state.isFetching = false));
 }
-filterElement.addEventListener(
-   'input',
-   debounce(e => {
-      state.filter = e.target.value;
-      update(true);
-   }, DEBOUNCE_DELAY)
-);
 
-window.addEventListener(
-   'scroll',
-   debounce(() => {
-      if (state.isAllFetched) {
-         return;
-      }
-      if (Math.ceil(window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-         state.page++;
-         update();
-      }
-   }, DEBOUNCE_DELAY)
-);
+const invokeUpdate = debounce(e => {
+   state.filter = e.target.value;
+   update(true);
+}, DEBOUNCE_DELAY);
+
+filterElement.addEventListener('keydown', e => {
+   if (state.isFetching) {
+      e.preventDefault();
+      return;
+   }
+   invokeUpdate(e);
+});
+
+window.addEventListener('scroll', () => {
+   if (state.isAllFetched || state.isFetching) {
+      return;
+   }
+   if (Math.ceil(window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+      state.page++;
+      update();
+   }
+});
 
 update();

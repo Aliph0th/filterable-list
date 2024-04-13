@@ -1,8 +1,9 @@
-import { postsContainerElement } from './constants.js';
+import { postsContainerElement, NO_POSTS } from './constants.js';
 import { createElement } from './helpers.js';
 
-export function clearPostsElement() {
-   postsContainerElement.innerHTML = '';
+export function removeSpinners() {
+   const spinners = [...document.querySelectorAll('.spinner')];
+   spinners.forEach(spinner => spinner.remove());
 }
 
 export function renderSpinner(insertFirst = false) {
@@ -14,20 +15,23 @@ export function renderSpinner(insertFirst = false) {
    postsContainerElement.insertAdjacentElement(position, spinner);
 }
 
-export function renderEndMessage(message) {
-   postsContainerElement.querySelector('.spinner')?.remove();
-   postsContainerElement.appendChild(
-      createElement({
-         type: 'p',
-         classNames: ['postsEnded'],
-         innerText: message
-      })
-   );
-}
+export function render(state, filterWasUpdated = false) {
+   if (state.records.length || filterWasUpdated) {
+      postsContainerElement.innerHTML = '';
+   }
+   if (!state.records.length) {
+      removeSpinners();
+      postsContainerElement.appendChild(
+         createElement({
+            type: 'p',
+            classNames: ['postsEnded'],
+            innerText: NO_POSTS
+         })
+      );
+      return;
+   }
 
-export function render(records) {
-   clearPostsElement();
-   for (const record of records) {
+   for (const record of state.records) {
       const userElement = createElement({
          type: 'div',
          classNames: ['user'],
