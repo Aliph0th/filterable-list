@@ -1,5 +1,6 @@
 import { postsContainerElement, NO_POSTS } from './constants.js';
 import { createElement } from './helpers.js';
+import { IState } from './interfaces/state.js';
 
 export function removeSpinners() {
    const spinners = [...document.querySelectorAll('.spinner')];
@@ -15,7 +16,7 @@ export function renderSpinner(insertFirst = false) {
    postsContainerElement.insertAdjacentElement(position, spinner);
 }
 
-export function render(state, filterWasUpdated = false) {
+export function render(state: IState, filterWasUpdated = false) {
    if (state.records.length || filterWasUpdated) {
       postsContainerElement.innerHTML = '';
    }
@@ -25,7 +26,7 @@ export function render(state, filterWasUpdated = false) {
          createElement({
             type: 'p',
             classNames: ['postsEnded'],
-            innerText: NO_POSTS
+            innerHTML: NO_POSTS
          })
       );
       return;
@@ -39,12 +40,12 @@ export function render(state, filterWasUpdated = false) {
             createElement({
                type: 'span',
                classNames: ['userName'],
-               innerText: record.name
+               innerHTML: record.name
             }),
             createElement({
                type: 'span',
                classNames: ['userInfo'],
-               innerText: `${record.phone} ${record.email}`
+               innerHTML: `${record.phone} ${record.email}`
             })
          ]
       });
@@ -56,12 +57,12 @@ export function render(state, filterWasUpdated = false) {
                createElement({
                   type: 'span',
                   classNames: ['title'],
-                  innerText: post.title
+                  innerHTML: post.title
                }),
                createElement({
                   type: 'p',
                   classNames: ['article'],
-                  innerText: post.body.replaceAll('\n', ' ')
+                  innerHTML: post.body.replaceAll('\n', ' ')
                })
             ]
          })

@@ -12,6 +12,12 @@ This is a application that allows you to view posts using the [JSONPlaceholder A
 -  Displays post title, body, and author information.
 -  Provides filter input that allows you to filter posts by title
 
+## Usage
+1) `git clone https://github.com/Aliph0th/filterable-list`
+2) `cd filterable-list`
+3) `npm i`
+4) `npm run dev`
+
 ## Technologies Used
 
 -  HTML, CSS, JS modules
